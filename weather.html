@@ -10,20 +10,19 @@
 </head>
 
 <body>
-
-    <div class="input">
-        <input type="text" placeholder="Enter the city name" class="input_text">
-        <input type="submit" value="Submit" class="submit">
+    <div class="form-wrapper">
+        <input id="input-text" type="text" placeholder="Enter the city" class="input_text">
+        <input id="submit-button" type="submit" value="Submit" class="submit">
+    </div>
+    <div class="cities-wrapper">
+        <button id="tbilisi" onclick="fetchWeatherInfo('Tbilisi')">Tbilisi</button>
+        <button id="kutaisi" onclick="fetchWeatherInfo('Kutaisi')">Kutaisi</button>
+        <button id="batumi" onclick="fetchWeatherInfo('Batumi')">Batumi</button>
     </div>
     </div>
-
+    <h1 class="city-name " id="city-name"></h1>
     <div class="container">
-        <div class="card" id="city-card">
-            <h1 class="name" id="name"></h1>
-            <p class="temp"></p>
-            <p class="clouds"></p>
-            <p class="desc"></p>
-        </div>
+        <div class="forecast-wrapper" id="forecast-wrapper"></div>
     </div>
     <script src="weather.js"></script>
 </body>
