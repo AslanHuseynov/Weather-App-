@@ -1,27 +1,64 @@
-var input = document.querySelector('.input_text');
-var main = document.querySelector('#name');
-var temp = document.querySelector('.temp');
-var desc = document.querySelector('.desc');
-var clouds = document.querySelector('.clouds');
-var button = document.querySelector('.submit');
-var card = document.querySelector('#city-card');
+var input = document.querySelector('#input-text');
+var cityTitle = document.querySelector('#city-name');
+var button = document.querySelector('#submit-button');
+var forecastWrapper = document.querySelector('#forecast-wrapper');
 
+function createForecastCard({ temp, clouds, weather, dt }, index) {
+    const forecastCard = document.createElement('div');
+    forecastCard.classList.add('card', 'is-visible');
 
-button.addEventListener('click', function() {
-    fetch('https://api.openweathermap.org/data/2.5/weather?q=' + input.value + '&appid=50a7aa80fa492fa92e874d23ad061374&units=metric')
+    const date = new Date(Date.now() + index * 24 * 60 * 60 * 1000);
+    const { day: dailyTemperature } = temp;
+    const { icon, description } = weather[0];
+
+    forecastCard.innerHTML = `
+        <img class="icon" src="http://openweathermap.org/img/wn/${icon}@2x.png" alt="${description}">
+        <div class="weather-info-wrapper">
+            <span class="temp">${dailyTemperature} °C</span>
+            <span class="desc">${description}</span>
+        </div>
+        <p class="date">${date.toLocaleDateString()}</p>
+    `;
+
+    return forecastCard;
+}
+
+function getOneWeekForecast(lon, lat) {
+    fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=hourly&appid=7a964a0acd57adfa7a660a56910c59cf&units=metric`)
+        .then(data => data.json())
+        .then(forecastData => {
+            const { daily } = forecastData;
+            forecastWrapper.innerHTML = '';
+
+            daily.forEach((dailyForecast, index) => {
+                console.log(dailyForecast);
+                forecastWrapper.appendChild(createForecastCard(dailyForecast, index));
+            });
+        })
+        .catch(err => console.error(err));
+}
+
+function fetchWeatherInfo(cityName) {
+    if (!cityName) {
+        alert('Please enter the city to get weather forecast for');
+        return;
+    }
+
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=7a964a0acd57adfa7a660a56910c59cf&units=metric`)
         .then(response => response.json())
         .then(data => {
-            var tempValue = data['main']['temp'];
-            var nameValue = data['name'];
-            var descValue = data['weather'][0]['description'];
+            const { coord: { lon, lat }, name } = data;
+            input.value = '';
+            cityTitle.innerHTML = name;
 
-            card.classList.add('is-visible');
-            main.innerHTML = nameValue;
-            desc.innerHTML = "Desc - " + descValue;
-            temp.innerHTML = "Temp - " + tempValue;
-            input.value = "";
-
+            getOneWeekForecast(lon, lat);
         })
+        .catch((err) => {
+            console.log(err);
+            alert('Something went wrong! Please, check your spelling and make sure that city name is correct')
+        });
+}
 
-    .catch(err => alert("Wrong city name!"));
+button.addEventListener('click', () => {
+    fetchWeatherInfo(input.value);
 });
